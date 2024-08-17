@@ -1,11 +1,7 @@
-import obstacles.Guard;
-import obstacles.Obstacle;
-import obstacles.ObstacleType;
+import obstacles.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
-
 
 class Main {
     public static void main(String[] args) {
@@ -46,19 +42,24 @@ class Main {
 
     public static ArrayList<Obstacle> parseObstacles(HashMap<String, ArrayList<String>> parsedArgs){
         ArrayList<Obstacle> obstacles = new ArrayList<>();
-        ObstacleType type = ObstacleType.GUARD;
-        String key = "-" + type.getArgumentName();
-        ArrayList<String> args = parsedArgs.get(key);
-        if (args == null){
-            return obstacles;
+        for (ObstacleType type : ObstacleType.values()) {
+            String key = "-" + type.getArgumentName();
+            ArrayList<String> args = parsedArgs.get(key);
+            if (args == null) {
+                continue;
+            }
+            for (String arg : args) {
+                // Remove the parentheses from the argument
+                String cleanedArg = stripParentheses(arg);
+                Obstacle obstacle = switch (type) {
+                    case GUARD -> Guard.parse(cleanedArg);
+                    case FENCE -> Fence.parse(cleanedArg);
+                    case SENSOR -> Sensor.parse(cleanedArg);
+                    case CAMERA -> Camera.parse(cleanedArg);
+                };
+                obstacles.add(obstacle);
+            }
         }
-
-        for (String arg : args) {
-            String cleanedArg = stripParentheses(arg);
-            Obstacle obstacle = Guard.parse(cleanedArg);
-            obstacles.add(obstacle);
-        }
-
         return obstacles;
     }
 }
